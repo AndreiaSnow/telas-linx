@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Telas Visual Linx</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f4f6f9; color: #333; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #0056b3; text-align: center; margin-top: 0; }
+        .search-box { margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
+        input[type="text"]:focus { border-color: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #0056b3; color: white; position: sticky; top: 0; z-index: 1; }
+        tr:hover { background-color: #f9f9f9; }
+        .table-container { max-height: 700px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; }
+        .loading { text-align: center; font-style: italic; color: #666; padding: 20px; }
+        .highlight { color: #0056b3; font-weight: bold; }
+        .tag-fila { font-size: 0.85em; background: #e9ecef; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+    </style>
+    <!-- Biblioteca PapaParse para ler o CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Consulta - Telas Visual Linx</h1>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Digite para pesquisar por Módulo, Tela, Título ou Fila...">
+        </div>
+
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>MÓDULO</th>
+                        <th>TELA</th>
+                        <th>TÍTULO</th>
+                        <th>FILA</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="4" class="loading">Carregando dados...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let dadosBase = [];
+        const tbody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('searchInput');
+
+        // Carrega o arquivo dados.csv
+        Papa.parse("dados.csv", {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                dadosBase = results.data;
+                renderTable(dadosBase);
+            },
+            error: function() {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red; padding:20px;"><strong>Erro:</strong> Arquivo <code>dados.csv</code> não encontrado. Certifique-se de que ele foi enviado para o GitHub junto com este site.</td></tr>';
+            }
+        });
+
+        // Função para preencher a tabela
+        function renderTable(data) {
+            tbody.innerHTML = '';
+            if(data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum resultado encontrado.</td></tr>';
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            // Limita a exibição inicial a 300 para o navegador não travar caso pesquisem algo muito genérico
+            const limit = Math.min(data.length, 300); 
+
+            for (let i = 0; i < limit; i++) {
+                const row = data[i];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row['MODULO'] || ''}</td>
+                    <td class="highlight">${row['TELA'] || ''}</td>
+                    <td>${row['TITULO'] || ''}</td>
+                    <td><span class="tag-fila">${row['FILA'] || ''}</span></td>
+                `;
+                fragment.appendChild(tr);
+            }
+            
+            if (data.length > 300) {
+                const trAviso = document.createElement('tr');
+                trAviso.innerHTML = `<td colspan="4" style="text-align:center; color:#666; font-size: 0.9em; background:#f9f9f9;">Mostrando os 300 primeiros resultados. Refine sua busca para ver mais.</td>`;
+                fragment.appendChild(trAviso);
+            }
+
+            tbody.appendChild(fragment);
+        }
+
+        // Filtro em tempo real (Corrigido para aceitar números puros)
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            if (term === '') {
+                renderTable(dadosBase);
+                return;
+            }
+            
+            const filtrados = dadosBase.filter(row => {
+                // Transforma tudo em texto (String) antes de converter para minúsculas
+                const modulo = String(row['MODULO'] || '').toLowerCase();
+                const tela = String(row['TELA'] || '').toLowerCase();
+                const titulo = String(row['TITULO'] || '').toLowerCase();
+                const fila = String(row['FILA'] || '').toLowerCase();
+                
+                return modulo.includes(term) || 
+                       tela.includes(term) || 
+                       titulo.includes(term) || 
+                       fila.includes(term);
+            });
+            renderTable(filtrados);
+        });
+    </script>
+</body>
+</html>
