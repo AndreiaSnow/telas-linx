@@ -1,5 +1,4 @@
-renderTable(dadosBase);
-                    return<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
@@ -261,7 +260,9 @@ renderTable(dadosBase);
             clearTimeout(timeout);
             timeout = setTimeout(() => {
                 const term = e.target.value.toLowerCase().trim();
-                if (term === '') {;
+                if (term === '') {
+                    renderTable(dadosBase);
+                    return;
                 }
                 const filtrados = dadosBase.filter(row => {
                     const modulo = String(row['MODULO'] || '').toLowerCase();
