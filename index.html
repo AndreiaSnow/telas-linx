@@ -1,126 +1,277 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+renderTable(dadosBase);
+                    return<!DOCTYPE html>
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de Telas Visual Linx</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f4f6f9; color: #333; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #0056b3; text-align: center; margin-top: 0; }
-        .search-box { margin-bottom: 20px; }
-        input[type="text"] { width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
-        input[type="text"]:focus { border-color: #0056b3; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #0056b3; color: white; position: sticky; top: 0; z-index: 1; }
-        tr:hover { background-color: #f9f9f9; }
-        .table-container { max-height: 700px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; }
-        .loading { text-align: center; font-style: italic; color: #666; padding: 20px; }
-        .highlight { color: #0056b3; font-weight: bold; }
-        .tag-fila { font-size: 0.85em; background: #e9ecef; padding: 4px 8px; border-radius: 4px; display: inline-block; }
-    </style>
-    <!-- Biblioteca PapaParse para ler o CSV -->
+    <title>Portal de Telas - Visual Linx</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; border: 2px solid #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h1>🔍 Consulta - Telas Visual Linx</h1>
-        
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Digite para pesquisar por Módulo, Tela, Título ou Fila...">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg shadow-sm">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                </div>
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Portal de Telas <span class="text-blue-600 font-medium">Linx</span></h1>
+            </div>
+            <div class="text-xs text-slate-600 font-semibold bg-slate-100 px-3 py-1.5 rounded-full flex items-center gap-2 border border-slate-200">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                Sistema Ativo
+            </div>
         </div>
-
-        <div class="table-container">
-            <table id="dataTable">
-                <thead>
-                    <tr>
-                        <th>MÓDULO</th>
-                        <th>TELA</th>
-                        <th>TÍTULO</th>
-                        <th>FILA</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="4" class="loading">Carregando dados...</td></tr>
-                </tbody>
-            </table>
+    </header>
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex items-center gap-5 transition-shadow hover:shadow-md">
+                <div class="bg-blue-50 text-blue-600 p-3.5 rounded-xl border border-blue-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Total de Telas</p>
+                    <h3 class="text-3xl font-bold text-slate-900 mt-1" id="statTelas">--</h3>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex items-center gap-5 transition-shadow hover:shadow-md">
+                <div class="bg-indigo-50 text-indigo-600 p-3.5 rounded-xl border border-indigo-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Módulos Ativos</p>
+                    <h3 class="text-3xl font-bold text-slate-900 mt-1" id="statModulos">--</h3>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex items-center gap-5 transition-shadow hover:shadow-md">
+                <div class="bg-emerald-50 text-emerald-600 p-3.5 rounded-xl border border-emerald-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Filas Mapeadas</p>
+                    <h3 class="text-3xl font-bold text-slate-900 mt-1" id="statFilas">--</h3>
+                </div>
+            </div>
         </div>
-    </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h2 class="text-lg font-bold text-slate-800">Catálogo de Sistema</h2>
+                <div class="relative w-full sm:w-2/5">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text" id="searchInput" class="block w-full pl-11 pr-4 py-2.5 border border-slate-300 rounded-lg leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white sm:text-sm transition-all" placeholder="Pesquisar por módulo, tela, título ou fila...">
+                </div>
+            </div>
+            <div class="overflow-x-auto custom-scrollbar flex-1" style="max-height: 55vh;">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 sticky top-0 z-10 shadow-[0_1px_0_#e2e8f0]">
+                        <tr>
+                            <th class="py-3.5 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Módulo</th>
+                            <th class="py-3.5 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Nº da Tela</th>
+                            <th class="py-3.5 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Título da Tela</th>
+                            <th class="py-3.5 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Fila de Atendimento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 bg-white">
+                        <tr><td colspan="4" class="py-16 text-center text-slate-500">A carregar dados do repositório...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center text-sm font-medium text-slate-500">
+                <span id="rodapeInfo">Aguardar sincronização...</span>
+                <span class="hidden sm:flex items-center gap-1.5 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Alta Performance
+                </span>
+            </div>
+        </div>
+    </main>
 
     <script>
         let dadosBase = [];
         const tbody = document.getElementById('tableBody');
         const searchInput = document.getElementById('searchInput');
+        const rodapeInfo = document.getElementById('rodapeInfo');
 
-        // Carrega o arquivo dados.csv
-        Papa.parse("dados.csv", {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                dadosBase = results.data;
-                renderTable(dadosBase);
-            },
-            error: function() {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red; padding:20px;"><strong>Erro:</strong> Arquivo <code>dados.csv</code> não encontrado. Certifique-se de que ele foi enviado para o GitHub junto com este site.</td></tr>';
+        const demoData = [
+            {"MODULO": "ATIVO", "TELA": "013006SPK", "TITULO": "CADASTRO DE IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013025SPK", "TITULO": "CORREÇÃO DA CLASSE E SUBCLASSE NO CADASTRO DO IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013027SPK", "TITULO": "PROJETOS EM ANDAMENTO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013028SPK", "TITULO": "INVENTÁRIO DE IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013010SPK", "TITULO": "CONSULTA DO IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013007SPK", "TITULO": "TRANSFERÊNCIA DE IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013008SPK", "TITULO": "BAIXA DE IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013009SPK", "TITULO": "GERA DEPRECIAÇÃO E CORREÇÕES DO IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013011SPK", "TITULO": "CONTABILIZAÇÃO DOS IMOBILIZADOS", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013015SPK", "TITULO": "TRANSFERÊNCIA EM LOTE DE IMOBILIZADOS", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013018SPK", "TITULO": "BAIXA EM LOTE DE IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013029SPK", "TITULO": "ALTERAÇÃO DE CLASSE E SUBCLASSE EM LOTE", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ATIVO", "TELA": "013030SPK", "TITULO": "ALTERAÇÃO DE NUMERO DE IMOBILIZADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CLIENTES", "TELA": "1022", "TITULO": "AGENDA / EVENTOS PARA PARCEIROS", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "1024", "TITULO": "CATEGORIAS DOS EVENTOS", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "1023", "TITULO": "TIPOS DOS EVENTOS", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "001038SPK", "TITULO": "ALÍQUOTA DE ICMS OPERAÇÃO", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "1001", "TITULO": "TIPOS DE BLOQUEIOS PARA CLIENTES", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "1003", "TITULO": "PONTUALIDADES PARA CLIENTES", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "001005SPK", "TITULO": "TIPOS DE CLIENTES", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "1009", "TITULO": "CONCEITOS DE CLIENTES", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "90001", "TITULO": "BANCOS", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES", "TELA": "001015SPK", "TITULO": "CLIENTES", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CLIENTES VAREJO", "TELA": "300005SPK", "TITULO": "CADASTROS DE CLIENTES VAREJO", "FILA": "MODA - LINX - WEBCHAMADOS LOJAS"},
+            {"MODULO": "CLIENTES VAREJO", "TELA": "300058SPK", "TITULO": "ESTATISTICA DE CLIENTES VAREJO", "FILA": "MODA - LINX - WEBCHAMADOS LOJAS"},
+            {"MODULO": "CLIENTES VAREJO", "TELA": "300035SPK", "TITULO": "CLIENTES VAREJO ( SAC )", "FILA": "MODA - LINX - WEBCHAMADOS LOJAS"},
+            {"MODULO": "CLIENTES VAREJO", "TELA": "300044SPK", "TITULO": "CONSULTA DE VENDAS POR CLIENTE", "FILA": "MODA - LINX - WEBCHAMADOS LOJAS"},
+            {"MODULO": "CLIENTES VAREJO", "TELA": "300038", "TITULO": "TIPO ATENDIMENTO DE CLIENTE VAREJO ( SAC )", "FILA": "MODA - LINX - WEBCHAMADOS LOJAS"},
+            {"MODULO": "CLIENTES VAREJO", "TELA": "300004", "TITULO": "TIPO DE BLOQUEIO PARA CLIENTE VAREJO", "FILA": "MODA - LINX - WEBCHAMADOS LOJAS"},
+            {"MODULO": "CLIENTES VAREJO", "TELA": "300145SPK", "TITULO": "TIPOS DE DOCUMENTO PARA CLIENTES VAREJO", "FILA": "MODA - LINX - WEBCHAMADOS LOJAS"},
+            {"MODULO": "COMPRAS", "TELA": "004035SPK", "TITULO": "CADASTRO DE CLASSES", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "COMPRAS", "TELA": "4018", "TITULO": "TABELA DE PRAZOS POR COR", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "COMPRAS", "TELA": "004013SPK", "TITULO": "STATUS DE COMPRAS", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "COMPRAS", "TELA": "004011SPK", "TITULO": "TIPOS DE COMPRA", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "COMPRAS", "TELA": "4017", "TITULO": "CADASTRO TIPOS DE DESPESAS DE COMPRAS", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "COMPRAS", "TELA": "4001", "TITULO": "MOEDAS", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "COMPRAS", "TELA": "004016SPK", "TITULO": "APROVAÇÃO DE PEDIDO DE COMPRA", "FILA": "MODA - LINX - WEBCHAMADOS ERP"},
+            {"MODULO": "CONTA DIGITAL", "TELA": "009259SPK", "TITULO": "CONTA DIGITAL INTEGRADA", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTABILIDADE", "TELA": "009000SPK", "TITULO": "CONFIGURAÇÃO DE SALDO AGRUPADO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTABILIDADE", "TELA": "009001SPK", "TITULO": "TIPO DE CONTA", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTABILIDADE", "TELA": "9004", "TITULO": "HISTÓRICO PADRÃO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTABILIDADE", "TELA": "009006SPK", "TITULO": "TIPO DE MOVIMENTO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTABILIDADE", "TELA": "009007SPK", "TITULO": "CONTA CONTÁBIL ANALÍTICA", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTABILIDADE", "TELA": "009008SPK", "TITULO": "TIPO DE LANÇAMENTO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTABILIDADE", "TELA": "009010SPK", "TITULO": "CENTRO DE CUSTO", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTAS A PAGAR", "TELA": "009034SPK", "TITULO": "CONSULTA GERAL DE CONTA", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTAS A PAGAR", "TELA": "009061SPK", "TITULO": "CONSULTA DE COMISSÃO DE REPRESENTANTES", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "CONTAS A PAGAR", "TELA": "009120SPK", "TITULO": "LISTA MOVIMENTOS DE FECHAMENTO DE COMISSÕES", "FILA": "MODA - LINX - RC FFC"},
+            {"MODULO": "ESTOQUE", "TELA": "002001SPK", "TITULO": "CONSULTA DE SALDO DE ESTOQUE", "FILA": "MODA - LINX - SUPORTE"},
+            {"MODULO": "VENDAS", "TELA": "007001SPK", "TITULO": "PEDIDO DE VENDA", "FILA": "MODA - LINX - VENDAS"}
+        ];
+
+        const colorCache = {};
+        const colors = [
+            'bg-blue-100 text-blue-700 border-blue-200', 
+            'bg-indigo-100 text-indigo-700 border-indigo-200', 
+            'bg-purple-100 text-purple-700 border-purple-200', 
+            'bg-emerald-100 text-emerald-700 border-emerald-200', 
+            'bg-amber-100 text-amber-700 border-amber-200', 
+            'bg-rose-100 text-rose-700 border-rose-200',
+            'bg-cyan-100 text-cyan-700 border-cyan-200'
+        ];
+        
+        function getModuleBadge(moduleName) {
+            if(!moduleName) return '<span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">-</span>';
+            const cleanName = String(moduleName).trim().toUpperCase();
+            if(!colorCache[cleanName]) {
+                colorCache[cleanName] = colors[Object.keys(colorCache).length % colors.length];
             }
-        });
+            return `<span class="px-2.5 py-1 rounded-md ${colorCache[cleanName]} text-[11px] font-bold border shadow-sm whitespace-nowrap tracking-wide">${cleanName}</span>`;
+        }
 
-        // Função para preencher a tabela
+        function updateDashboardStats(data) {
+            document.getElementById('statTelas').innerText = data.length.toLocaleString('pt-PT');
+            const modulos = new Set(data.map(i => i['MODULO']).filter(v => v && String(v).trim() !== ''));
+            document.getElementById('statModulos').innerText = modulos.size.toLocaleString('pt-PT');
+            const filas = new Set(data.map(i => i['FILA']).filter(v => v && String(v).trim() !== ''));
+            document.getElementById('statFilas').innerText = filas.size.toLocaleString('pt-PT');
+        }
+
+        function carregarDadosDemonstracao() {
+            dadosBase = demoData;
+            updateDashboardStats(dadosBase);
+            renderTable(dadosBase);
+            rodapeInfo.innerHTML = '<span class="text-amber-600 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Modo de demonstração (ficheiro original não localizado).</span>';
+        }
+
+        try {
+            Papa.parse("dados.csv", {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    dadosBase = results.data;
+                    updateDashboardStats(dadosBase);
+                    renderTable(dadosBase);
+                },
+                error: function() {
+                    carregarDadosDemonstracao();
+                }
+            });
+        } catch (erro) {
+            console.warn("Ambiente de preview detetado ou erro de URL. A usar dados de demonstração.", erro);
+            carregarDadosDemonstracao();
+        }
+
         function renderTable(data) {
             tbody.innerHTML = '';
             if(data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum resultado encontrado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="py-16 text-center"><div class="flex flex-col items-center gap-3"><svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-slate-500 font-medium">Nenhum resultado encontrado para a sua pesquisa.</span></div></td></tr>';
+                if(rodapeInfo.innerText.indexOf('Modo de demonstração') === -1) {
+                    rodapeInfo.innerText = "0 resultados.";
+                }
                 return;
             }
 
             const fragment = document.createDocumentFragment();
-            // Limita a exibição inicial a 300 para o navegador não travar caso pesquisem algo muito genérico
             const limit = Math.min(data.length, 300); 
-
             for (let i = 0; i < limit; i++) {
                 const row = data[i];
                 const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50/50 transition-colors group cursor-default";
                 tr.innerHTML = `
-                    <td>${row['MODULO'] || ''}</td>
-                    <td class="highlight">${row['TELA'] || ''}</td>
-                    <td>${row['TITULO'] || ''}</td>
-                    <td><span class="tag-fila">${row['FILA'] || ''}</span></td>
+                    <td class="py-3 px-6 whitespace-nowrap">${getModuleBadge(row['MODULO'])}</td>
+                    <td class="py-3 px-6 whitespace-nowrap">
+                        <span class="font-mono text-sm font-bold text-slate-700 bg-slate-100/80 px-2.5 py-1.5 rounded-md border border-slate-200 group-hover:bg-white group-hover:border-blue-200 group-hover:text-blue-700 transition-all shadow-sm">
+                            ${row['TELA'] || '-'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-6 text-sm text-slate-800 font-medium">${row['TITULO'] || '-'}</td>
+                    <td class="py-3 px-6 whitespace-nowrap text-sm text-slate-500">
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full w-fit border border-slate-100 group-hover:bg-white transition-colors">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            ${row['FILA'] || '-'}
+                        </div>
+                    </td>
                 `;
                 fragment.appendChild(tr);
             }
-            
-            if (data.length > 300) {
-                const trAviso = document.createElement('tr');
-                trAviso.innerHTML = `<td colspan="4" style="text-align:center; color:#666; font-size: 0.9em; background:#f9f9f9;">Mostrando os 300 primeiros resultados. Refine sua busca para ver mais.</td>`;
-                fragment.appendChild(trAviso);
-            }
-
             tbody.appendChild(fragment);
+
+            if(rodapeInfo.innerText.indexOf('Modo de demonstração') === -1) {
+                if (data.length > 300) {
+                    rodapeInfo.innerText = `A mostrar 300 de ${data.length.toLocaleString('pt-PT')} resultados.`;
+                } else {
+                    rodapeInfo.innerText = `A mostrar os ${data.length.toLocaleString('pt-PT')} resultados.`;
+                }
+           }
         }
 
-        // Filtro em tempo real (Corrigido para aceitar números puros)
+        let timeout = null;
         searchInput.addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase().trim();
-            if (term === '') {
-                renderTable(dadosBase);
-                return;
-            }
-            
-            const filtrados = dadosBase.filter(row => {
-                // Transforma tudo em texto (String) antes de converter para minúsculas
-                const modulo = String(row['MODULO'] || '').toLowerCase();
-                const tela = String(row['TELA'] || '').toLowerCase();
-                const titulo = String(row['TITULO'] || '').toLowerCase();
-                const fila = String(row['FILA'] || '').toLowerCase();
-                
-                return modulo.includes(term) || 
-                       tela.includes(term) || 
-                       titulo.includes(term) || 
-                       fila.includes(term);
-            });
-            renderTable(filtrados);
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                const term = e.target.value.toLowerCase().trim();
+                if (term === '') {;
+                }
+                const filtrados = dadosBase.filter(row => {
+                    const modulo = String(row['MODULO'] || '').toLowerCase();
+                    const tela = String(row['TELA'] || '').toLowerCase();
+                    const titulo = String(row['TITULO'] || '').toLowerCase();
+                    const fila = String(row['FILA'] || '').toLowerCase();
+                    return modulo.includes(term) || tela.includes(term) || titulo.includes(term) || fila.includes(term);
+                });
+                renderTable(filtrados);
+            }, 100); 
         });
     </script>
 </body>
